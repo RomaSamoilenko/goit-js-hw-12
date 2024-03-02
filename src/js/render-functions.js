@@ -24,5 +24,5 @@ function fullTemplate(elements) {
 
 export function renderGallery(gallery, elements) {
     const markup = fullTemplate(elements);
-    gallery.insertAdjacentHTML('afterbegin', markup);
+    gallery.insertAdjacentHTML('beforeend', markup);
 }

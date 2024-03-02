@@ -49,7 +49,7 @@ a {
 }
 
 input {
-  /* width: 100%; */
+  
   flex-grow: 1;
   height: 40px;
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
@@ -107,7 +107,7 @@ button:disabled {
   cursor: unset;
 }
 
-/*search*/
+/*search-form*/
 .search-form {
   display: flex;
   align-items: center;
@@ -118,21 +118,20 @@ button:disabled {
 }
 
 .items-wrap {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /*gallery*/
-
 .gallery {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-gap: 24px;
+  width: 100%;
   max-width: 1158px;
-  margin: 32px auto;
+  margin: 32px auto 24px;
   padding: 0 15px;
-}
-.items-wrap.loading .gallery {
-  display: none;
 }
 .gallery .gallery-item {
   display: grid;
@@ -175,20 +174,39 @@ button:disabled {
   font-weight: 600;
 }
 
-/*.loader*/
-.loader{
-  width:120px;
-  height:24px;
-  -webkit-mask:
-    radial-gradient(circle closest-side,#fff 94%,#0000) 0 0/25% 100%,
-    linear-gradient(#fff 0 0) center/calc(100% - 12px) calc(100% - 12px) no-repeat;
-  mask:
-    radial-gradient(circle closest-side,#fff 94%,#0000) 0 0/25% 100%,
-    linear-gradient(#fff 0 0) center/calc(100% - 12px) calc(100% - 12px) no-repeat;
-  background: linear-gradient(#FF3D00 0 0) left/0% 100% no-repeat #fff;
-  animation:bblprg 2s infinite linear;
-}
-@keyframes bblprg {
-    100% {background-size:100% 100%}
+/*css-loader*/
+.loader {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 32px 0 #fff, -32px 0 #fff;
+  position: relative;
+  animation: flash 0.5s ease-out infinite alternate;
 }
 
+@keyframes flash {
+  0% {
+    background-color: #FFF2;
+    box-shadow: 32px 0 #FFF2, -32px 0 #FFF;
+  }
+  50% {
+    background-color: #FFF;
+    box-shadow: 32px 0 #FFF2, -32px 0 #FFF2;
+  }
+  100% {
+    background-color: #FFF2;
+    box-shadow: 32px 0 #FFF, -32px 0 #FFF2;
+  }
+}
+
+/*load-more*/
+.load-more {
+  display: block;
+  min-width: 125px;
+  margin: 0 auto 32px;
+}
+.hidden {
+  display: none;
+  opacity: 0;
+}

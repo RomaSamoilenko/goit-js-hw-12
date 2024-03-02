@@ -10,49 +10,135 @@ import { renderGallery } from './js/render-functions';
 const form = document.querySelector('.search-form');
 const itemsWrap = document.querySelector('.items-wrap');
 const gallery = document.querySelector('.gallery');
+const loadMore = document.querySelector('.load-more');
+
+let searchQuery;
+let page;
+let maxPage;
+const PER_PAGE = 15;
+let lightbox;
 
 form.addEventListener('submit', getSearchResult);
+loadMore.addEventListener('click', onLoadMoreClick);
 
-function getSearchResult(evt) {
+async function getSearchResult(evt) {
     evt.preventDefault();
     
     gallery.innerHTML = '';
 
-    const searchQuery = form.elements.searchField.value.trim();
+    page = 1;
+    maxPage = 1;
+    
+    loadMore.classList.add('hidden');
+
+    searchQuery = form.elements.searchField.value.trim();
     if (searchQuery) {
         
-        itemsWrap.classList.add('loading');
+        showLoader();
 
-        pixabayAPI(searchQuery)
-            .then(data => {
+        try {
+            const data = await pixabayAPI(searchQuery, PER_PAGE, page);
+
+            if (data['hits'].length !== 0) {
+                maxPage = Math.ceil(data.totalHits / PER_PAGE);
+
+                renderGallery(gallery, data['hits']);
+                createLightboxInstance();
                 
-                itemsWrap.classList.remove('loading');
+                endSearchResultsMsg();
+            } else {
+                
+                const options = {
+                    message: 'Sorry, there are no images matching your search query. Please try again!',
+                    bgColor: '#EF4040',
+                    progressColor: '#B51B1B',
+                };
+                showSearchError(options);
+            }
+        } catch (err) {
+            console.log(err);
+        }
 
-                if (data['hits'].length !== 0) {
-                    renderGallery(gallery, data['hits']);
-                    createLightboxInstance();
-                } else {
-                    showSearchError();
-                }
-            })
-            .catch(err => {
-                console.log(err);
-                itemsWrap.classList.remove('loading');
-            });
+        hideLoader();
     }
+    showHideLoadBtn();
+    form.reset();
+}
+
+async function onLoadMoreClick() {
+    page += 1;
+    
+    showLoader();
+
+    const data = await pixabayAPI(searchQuery, PER_PAGE, page);
+    renderGallery(gallery, data['hits']);
+
+    
+    lightbox.refresh();
+    
+    hideLoader();
+    
+    endSearchResultsMsg();
+    
+    showHideLoadBtn();
+    
+    scrollToElements();
 }
 
 
 function createLightboxInstance() {
-    const lightbox = new SimpleLightbox('.gallery a');
+    lightbox = new SimpleLightbox('.gallery a');
     lightbox.refresh();
 }
 
-function showSearchError() {
-    iziToast.error({
-        message: 'Sorry, there are no images matching your search query. Please try again!',
-        position: 'topRight',
-        messageColor: '#FAFAFB',
-        backgroundColor: '#EF4040'
+function showLoader() {
+    itemsWrap.classList.add('loading');
+}
+
+function hideLoader() {
+    itemsWrap.classList.remove('loading');
+}
+
+function scrollToElements() {
+    const scrollHeight = gallery.firstElementChild.getBoundingClientRect().height * 2;
+
+    window.scrollBy({
+        behavior: 'smooth',
+        top: scrollHeight,
     });
+}
+
+
+function showSearchError({ message, bgColor, progressColor }) {
+    iziToast.error({
+        message: message,
+        messageColor: '#fff',
+        backgroundColor: bgColor,
+        theme: 'dark',
+        position: 'topRight',
+        timeout: 3000,
+        progressBarColor: progressColor,
+        animateInside: false,
+        transitionIn: 'fadeIn',
+    });
+}
+
+function showHideLoadBtn() {
+    if (page >= maxPage) {
+        loadMore.classList.add('hidden');
+    } else {
+        loadMore.classList.remove('hidden');
+    }
+}
+
+function endSearchResultsMsg() {
+    if (page >= maxPage) {
+        const options = {
+            message: "We're sorry, but you've reached the end of search results.",
+            bgColor: '#2db4cf',
+            progressColor: '#40666e',
+        };
+
+        showSearchError(options);
+    }
 }
